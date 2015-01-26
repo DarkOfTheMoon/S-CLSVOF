@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,37 +21,26 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Global
-    alphaCourantNo
-
-Description
-    Calculates and outputs the mean and maximum Courant Numbers.
-
 \*---------------------------------------------------------------------------*/
 
-scalar maxAlphaCo
+#include "immiscibleIncompressibleThreePhaseMixture.H"
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::immiscibleIncompressibleThreePhaseMixture::
+immiscibleIncompressibleThreePhaseMixture
 (
-    readScalar(runTime.controlDict().lookup("maxAlphaCo"))
-);
-
-scalar alphaCoNum = 0.0;
-scalar meanAlphaCoNum = 0.0;
-
-if (mesh.nInternalFaces())
-{
-    scalarField sumPhi
+    const volVectorField& U,
+    const surfaceScalarField& phi
+)
+:
+    incompressibleThreePhaseMixture(U, phi),
+    threePhaseInterfaceProperties
     (
-        mixture.nearInterface()().internalField()
-       *fvc::surfaceSum(mag(phi))().internalField()
-    );
+        static_cast<incompressibleThreePhaseMixture&>(*this)
+    )
+{}
 
-    alphaCoNum = 0.5*gMax(sumPhi/mesh.V().field())*runTime.deltaTValue();
-
-    meanAlphaCoNum =
-        0.5*(gSum(sumPhi)/gSum(mesh.V().field()))*runTime.deltaTValue();
-}
-
-Info<< "Interface Courant Number mean: " << meanAlphaCoNum
-    << " max: " << alphaCoNum << endl;
 
 // ************************************************************************* //

@@ -4,11 +4,12 @@
       + fvm::div(rhoPhi, U)
       + turbulence->divDevRhoReff(rho, U)
      ==
-        sources(rho, U)
+        fvOptions(rho, U)
     );
 
     UEqn.relax();
-    sources.constrain(UEqn);
+
+    fvOptions.constrain(UEqn);
 
     if (pimple.momentumPredictor())
     {
@@ -26,4 +27,6 @@
                 ) * mesh.magSf()
             )
         );
+
+        fvOptions.correct(U);
     }

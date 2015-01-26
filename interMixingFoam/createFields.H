@@ -12,53 +12,6 @@
         mesh
     );
 
-    Info<< "Reading field alpha1\n" << endl;
-    volScalarField alpha1
-    (
-        IOobject
-        (
-            "alpha1",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-
-    Info<< "Reading field alpha2\n" << endl;
-    volScalarField alpha2
-    (
-        IOobject
-        (
-            "alpha2",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-
-    Info<< "Reading field alpha3\n" << endl;
-    volScalarField alpha3
-    (
-        IOobject
-        (
-            "alpha3",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    alpha3 == 1.0 - alpha1 - alpha2;
-
-
     Info<< "Reading field U\n" << endl;
     volVectorField U
     (
@@ -75,13 +28,17 @@
 
     #include "createPhi.H"
 
-    threePhaseMixture threePhaseProperties(U, phi);
+    immiscibleIncompressibleThreePhaseMixture mixture(U, phi);
 
-    const dimensionedScalar& rho1 = threePhaseProperties.rho1();
-    const dimensionedScalar& rho2 = threePhaseProperties.rho2();
-    const dimensionedScalar& rho3 = threePhaseProperties.rho3();
+    volScalarField& alpha1(mixture.alpha1());
+    volScalarField& alpha2(mixture.alpha2());
+    volScalarField& alpha3(mixture.alpha3());
 
-    dimensionedScalar D23(threePhaseProperties.lookup("D23"));
+    const dimensionedScalar& rho1 = mixture.rho1();
+    const dimensionedScalar& rho2 = mixture.rho2();
+    const dimensionedScalar& rho3 = mixture.rho3();
+
+    dimensionedScalar D23(mixture.lookup("D23"));
 
     // Need to store rho for ddt(rho, U)
     volScalarField rho
@@ -106,7 +63,7 @@
     (
         IOobject
         (
-            "rho*phi",
+            "rhoPhi",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
@@ -117,13 +74,13 @@
 
 
     // Construct interface from alpha distribution
-    threePhaseInterfaceProperties interface(threePhaseProperties);
+//     threePhaseInterfaceProperties interface(threePhaseProperties);
 
 
     // Construct incompressible turbulence model
     autoPtr<incompressible::turbulenceModel> turbulence
     (
-        incompressible::turbulenceModel::New(U, phi, threePhaseProperties)
+        incompressible::turbulenceModel::New(U, phi, mixture)
     );
 
 
@@ -166,4 +123,4 @@
         p_rgh = p - rho*gh;
     }
 
-    IObasicSourceList sources(mesh);
+    fv::IOoptionList fvOptions(mesh);

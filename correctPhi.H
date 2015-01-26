@@ -30,7 +30,7 @@
         pcorrTypes
     );
 
-    dimensionedScalar rAUf("(1|A(U))", dimTime/rho.dimensions(), 1.0);
+    dimensionedScalar rAUf("rAUf", dimTime/rho.dimensions(), 1.0);
 
     adjustPhi(phi, U, pcorr);
 

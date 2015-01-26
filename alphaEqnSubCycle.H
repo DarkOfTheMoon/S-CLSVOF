@@ -1,6 +1,3 @@
-label nAlphaCorr(readLabel(pimple.dict().lookup("nAlphaCorr")));
-label nAlphaSubCycles(readLabel(pimple.dict().lookup("nAlphaSubCycles")));
-
 if (nAlphaSubCycles > 1)
 {
     dimensionedScalar totalDeltaT = runTime.deltaT();

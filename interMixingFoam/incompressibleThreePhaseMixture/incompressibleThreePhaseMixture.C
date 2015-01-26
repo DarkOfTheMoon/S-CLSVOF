@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "threePhaseMixture.H"
+#include "incompressibleThreePhaseMixture.H"
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 #include "fvc.H"
@@ -31,7 +31,7 @@ License
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 //- Calculate and return the laminar viscosity
-void Foam::threePhaseMixture::calcNu()
+void Foam::incompressibleThreePhaseMixture::calcNu()
 {
     nuModel1_->correct();
     nuModel2_->correct();
@@ -44,17 +44,82 @@ void Foam::threePhaseMixture::calcNu()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::threePhaseMixture::threePhaseMixture
+Foam::incompressibleThreePhaseMixture::incompressibleThreePhaseMixture
 (
     const volVectorField& U,
     const surfaceScalarField& phi
 )
 :
-    transportModel(U, phi),
+    IOdictionary
+    (
+        IOobject
+        (
+            "transportProperties",
+            U.time().constant(),
+            U.db(),
+            IOobject::MUST_READ_IF_MODIFIED,
+            IOobject::NO_WRITE
+        )
+    ),
 
-    phase1Name_("phase1"),
-    phase2Name_("phase2"),
-    phase3Name_("phase3"),
+    phase1Name_(wordList(lookup("phases"))[0]),
+    phase2Name_(wordList(lookup("phases"))[1]),
+    phase3Name_(wordList(lookup("phases"))[2]),
+
+    alpha1_
+    (
+        IOobject
+        (
+            IOobject::groupName("alpha", phase1Name_),
+            U.time().timeName(),
+            U.mesh(),
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        U.mesh()
+    ),
+
+    alpha2_
+    (
+        IOobject
+        (
+            IOobject::groupName("alpha", phase2Name_),
+            U.time().timeName(),
+            U.mesh(),
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        U.mesh()
+    ),
+
+    alpha3_
+    (
+        IOobject
+        (
+            IOobject::groupName("alpha", phase3Name_),
+            U.time().timeName(),
+            U.mesh(),
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        U.mesh()
+    ),
+
+    U_(U),
+    phi_(phi),
+
+    nu_
+    (
+        IOobject
+        (
+            "nu",
+            U.time().timeName(),
+            U.db()
+        ),
+        U.mesh(),
+        dimensionedScalar("nu", dimensionSet(0, 2, -1, 0, 0), 0),
+        calculatedFvPatchScalarField::typeName
+    ),
 
     nuModel1_
     (
@@ -89,35 +154,17 @@ Foam::threePhaseMixture::threePhaseMixture
 
     rho1_(nuModel1_->viscosityProperties().lookup("rho")),
     rho2_(nuModel2_->viscosityProperties().lookup("rho")),
-    rho3_(nuModel3_->viscosityProperties().lookup("rho")),
-
-    U_(U),
-    phi_(phi),
-
-    alpha1_(U_.db().lookupObject<const volScalarField> ("alpha1")),
-    alpha2_(U_.db().lookupObject<const volScalarField> ("alpha2")),
-    alpha3_(U_.db().lookupObject<const volScalarField> ("alpha3")),
-
-    nu_
-    (
-        IOobject
-        (
-            "nu",
-            U_.time().timeName(),
-            U_.db()
-        ),
-        U_.mesh(),
-        dimensionedScalar("nu", dimensionSet(0, 2, -1, 0, 0), 0),
-        calculatedFvPatchScalarField::typeName
-    )
+    rho3_(nuModel3_->viscosityProperties().lookup("rho"))
 {
+    alpha3_ == 1.0 - alpha1_ - alpha2_;
     calcNu();
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::volScalarField> Foam::threePhaseMixture::mu() const
+Foam::tmp<Foam::volScalarField>
+Foam::incompressibleThreePhaseMixture::mu() const
 {
     return tmp<volScalarField>
     (
@@ -132,7 +179,8 @@ Foam::tmp<Foam::volScalarField> Foam::threePhaseMixture::mu() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::threePhaseMixture::muf() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::incompressibleThreePhaseMixture::muf() const
 {
     surfaceScalarField alpha1f(fvc::interpolate(alpha1_));
     surfaceScalarField alpha2f(fvc::interpolate(alpha2_));
@@ -151,7 +199,8 @@ Foam::tmp<Foam::surfaceScalarField> Foam::threePhaseMixture::muf() const
 }
 
 
-Foam::tmp<Foam::surfaceScalarField> Foam::threePhaseMixture::nuf() const
+Foam::tmp<Foam::surfaceScalarField>
+Foam::incompressibleThreePhaseMixture::nuf() const
 {
     surfaceScalarField alpha1f(fvc::interpolate(alpha1_));
     surfaceScalarField alpha2f(fvc::interpolate(alpha2_));
@@ -172,7 +221,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::threePhaseMixture::nuf() const
 }
 
 
-bool Foam::threePhaseMixture::read()
+bool Foam::incompressibleThreePhaseMixture::read()
 {
     if (transportModel::read())
     {
