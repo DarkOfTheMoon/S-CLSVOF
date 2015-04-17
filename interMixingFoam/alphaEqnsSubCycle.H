@@ -1,11 +1,17 @@
-const dictionary& pimpleDict = pimple.dict();
-label nAlphaCorr(readLabel(pimpleDict.lookup("nAlphaCorr")));
-label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
-
 if (nAlphaSubCycles > 1)
 {
-    surfaceScalarField rhoPhiSum(0.0*rhoPhi);
     dimensionedScalar totalDeltaT = runTime.deltaT();
+    surfaceScalarField rhoPhiSum
+    (
+        IOobject
+        (
+            "rhoPhiSum",
+            runTime.timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedScalar("0", rhoPhi.dimensions(), 0)
+    );
 
     for
     (
@@ -23,8 +29,6 @@ else
 {
     #include "alphaEqns.H"
 }
-
-interface.correct();
 
 {
     volScalarField rhoNew(alpha1*rho1 + alpha2*rho2 + alpha3*rho3);

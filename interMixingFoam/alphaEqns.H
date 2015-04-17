@@ -12,7 +12,7 @@
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        interface.cAlpha()*mag(phi/mesh.magSf())*interface.nHatf()
+        mixture.cAlpha()*mag(phi/mesh.magSf())*mixture.nHatf()
     );
 
     for (int gCorr=0; gCorr<nAlphaCorr; gCorr++)
@@ -75,6 +75,7 @@
         MULES::limiter
         (
             allLambda,
+            1.0/runTime.deltaT().value(),
             geometricOneField(),
             alpha1,
             phiAlpha1BD,
@@ -116,6 +117,7 @@
         MULES::limiter
         (
             allLambda,
+            1.0/runTime.deltaT().value(),
             geometricOneField(),
             alpha2,
             phiAlpha2BD,
@@ -161,13 +163,13 @@
 
     Info<< "Air phase volume fraction = "
         << alpha1.weightedAverage(mesh.V()).value()
-        << "  Min(alpha1) = " << min(alpha1).value()
-        << "  Max(alpha1) = " << max(alpha1).value()
+        << "  Min(" << alpha1.name() <<") = " << min(alpha1).value()
+        << "  Max(" << alpha1.name() <<") = " << max(alpha1).value()
         << endl;
 
     Info<< "Liquid phase volume fraction = "
         << alpha2.weightedAverage(mesh.V()).value()
-        << "  Min(alpha2) = " << min(alpha2).value()
-        << "  Max(alpha2) = " << max(alpha2).value()
+        << "  Min(" << alpha2.name() <<") = " << min(alpha2).value()
+        << "  Max(" << alpha2.name() <<") = " << max(alpha2).value()
         << endl;
 }

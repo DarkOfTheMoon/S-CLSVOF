@@ -73,10 +73,6 @@
     );
 
 
-    // Construct interface from alpha distribution
-//     threePhaseInterfaceProperties interface(threePhaseProperties);
-
-
     // Construct incompressible turbulence model
     autoPtr<incompressible::turbulenceModel> turbulence
     (

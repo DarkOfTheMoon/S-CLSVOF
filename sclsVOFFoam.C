@@ -38,13 +38,17 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "MULES.H"
+#include "CMULES.H"
+#include "EulerDdtScheme.H"
+#include "localEulerDdtScheme.H"
+#include "CrankNicolsonDdtScheme.H"
 #include "subCycle.H"
 #include "immiscibleIncompressibleTwoPhaseMixture.H"
 #include "turbulenceModel.H"
 #include "interpolationTable.H"
 #include "pimpleControl.H"
 #include "fvIOoptionList.H"
+#include "fixedFluxPressureFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

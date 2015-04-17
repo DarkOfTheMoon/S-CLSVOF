@@ -1,9 +1,5 @@
 const dictionary& pimpleDict = pimple.dict();
 
-label nAlphaCorr(readLabel(pimpleDict.lookup("nAlphaCorr")));
-
-label nAlphaSubCycles(readLabel(pimpleDict.lookup("nAlphaSubCycles")));
-
 if (nAlphaSubCycles > 1)
 {
     dimensionedScalar totalDeltaT = runTime.deltaT();
