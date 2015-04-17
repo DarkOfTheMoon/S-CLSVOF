@@ -39,12 +39,11 @@ Description
 #include "fvCFD.H"
 #include "MULES.H"
 #include "subCycle.H"
-#include "interfaceProperties.H"
-#include "twoPhaseMixture.H"
+#include "immiscibleIncompressibleTwoPhaseMixture.H"
 #include "turbulenceModel.H"
-#include "MRFZones.H"
+#include "IOMRFZoneList.H"
 #include "pimpleControl.H"
-#include "IObasicSourceList.H"
+#include "fvIOoptionList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,8 +78,9 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        twoPhaseProperties.correct();
+        mixture.correct();
 
+        #include "alphaControls.H"
         #include "alphaEqnSubCycle.H"
         #include "zonePhaseVolumes.H"
 

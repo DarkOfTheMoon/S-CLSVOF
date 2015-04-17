@@ -9,10 +9,10 @@
     (
         "phiHbyA",
         (fvc::interpolate(HbyA) & mesh.Sf())
-      + fvc::ddtPhiCorr(rAU, rho, U, phi)
+      + fvc::interpolate(rho*rAU)*fvc::ddtCorr(U, phi)
     );
     adjustPhi(phiHbyA, U, p_rgh);
-    mrfZones.relativeFlux(phiHbyA);
+    mrfZones.makeRelative(phiHbyA);
     phi = phiHbyA;
 
     surfaceScalarField phig
@@ -42,7 +42,7 @@
 
             U = HbyA + rAU*fvc::reconstruct((phig - p_rghEqn.flux())/rAUf);
             U.correctBoundaryConditions();
-            sources.correct(U);
+            fvOptions.correct(U);
         }
     }
 
