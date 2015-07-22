@@ -23,7 +23,7 @@
         )
     );
 
-        MULES::explicitSolve(alpha1, phi, phiAlpha, 1, 0);
+    MULES::explicitSolve(alpha1, phi, phiAlpha, 1, 0);
 
-        rhoPhi = phiAlpha*(rho1 - rho2) + phi*rho2;
+    rhoPhi = phiAlpha*(rho1 - rho2) + phi*rho2;
 }
